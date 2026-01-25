@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: backend
+    env: python
+    buildCommand: ./backend/build.sh
+    startCommand: ./backend/start_dev.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: mindspark_backend.settings
+      - key: ALLOWED_HOSTS
+        value: '*'
