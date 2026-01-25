@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background: #4f46e5;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Backend API Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Register User</h2>
+        <button onclick="testRegister()">Test Register</button>
+        <pre id="register-result"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Login User</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <pre id="login-result"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Get Current User</h2>
+        <button onclick="testCurrentUser()">Test Get User</button>
+        <pre id="user-result"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let authToken = null;
+
+        async function testRegister() {
+            const resultEl = document.getElementById('register-result');
+            resultEl.textContent = 'Testing...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'testuser' + Date.now(),
+                        email: `test${Date.now()}@example.com`,
+                        password: 'testpass123',
+                        first_name: 'Test User'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    resultEl.className = 'success';
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    resultEl.className = 'error';
+                    resultEl.textContent = `Error ${response.status}: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultEl.className = 'error';
+                resultEl.textContent = `Network Error: ${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const resultEl = document.getElementById('login-result');
+            resultEl.textContent = 'Testing...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'bcadns@gmail.com',
+                        password: 'your_password_here'  // Update this
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    resultEl.className = 'success';
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    resultEl.className = 'error';
+                    resultEl.textContent = `Error ${response.status}: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultEl.className = 'error';
+                resultEl.textContent = `Network Error: ${error.message}`;
+            }
+        }
+
+        async function testCurrentUser() {
+            const resultEl = document.getElementById('user-result');
+            resultEl.textContent = 'Testing...';
+
+            if (!authToken) {
+                resultEl.className = 'error';
+                resultEl.textContent = 'No auth token. Please login first.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultEl.className = 'success';
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    resultEl.className = 'error';
+                    resultEl.textContent = `Error ${response.status}: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultEl.className = 'error';
+                resultEl.textContent = `Network Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

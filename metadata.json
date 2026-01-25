@@ -1,0 +1,5 @@
+{
+  "name": "MindSpark AI Quiz",
+  "description": "An intelligent quiz generator that creates personalized assessments on any topic using Google Gemini AI, complete with certification.",
+  "requestFramePermissions": []
+}
