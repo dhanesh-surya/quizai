@@ -1,146 +1,97 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from .models import Quiz, Question, QuizAttempt, UserAnswer, UserProfile
-from .serializers import (
-    QuizSerializer, QuestionSerializer, QuizAttemptSerializer,
-    UserAnswerSerializer, QuizCreateSerializer, QuizSubmitSerializer,
-    RegisterSerializer, LoginSerializer, UserProfileSerializer, UserUpdateSerializer
-)
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.db.models import Avg, Max
+from django.http import HttpResponse
+
+from .models import Quiz, Question, QuizAttempt, UserAnswer, UserProfile, SiteTheme
 from .gemini_service import generate_quiz_questions
 import logging
 
 logger = logging.getLogger(__name__)
 
+def landing_page(request):
+    """Show landing page or redirect to dashboard if authenticated"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'quiz/landing.html')
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def register(request):
-    """Register a new user"""
-    serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        token, _ = Token.objects.get_or_create(user=user)
-        profile = user.profile
-        
-        return Response({
-            'token': token.key,
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'name': user.first_name or user.username,
-                'avatar': profile.avatar.url if profile.avatar else None,
-                'is_admin': profile.is_admin
-            }
-        }, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def register_view(request):
+    """Handle user registration"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
 
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def login(request):
-    """Login user"""
-    serializer = LoginSerializer(data=request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return render(request, 'quiz/register.html')
         
         try:
-            user = User.objects.get(email=email)
-            user = authenticate(username=user.username, password=password)
+            from django.contrib.auth.models import User
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists")
+                return render(request, 'quiz/register.html')
             
-            if user:
-                token, _ = Token.objects.get_or_create(user=user)
-                profile, _ = UserProfile.objects.get_or_create(user=user)
-                
-                return Response({
-                    'token': token.key,
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                        'email': user.email,
-                        'name': user.first_name or user.username,
-                        'avatar': profile.avatar.url if profile.avatar else None,
-                        'is_admin': profile.is_admin
-                    }
-                })
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "Email already exists")
+                return render(request, 'quiz/register.html')
+
+            user = User.objects.create_user(username=username, email=email, password=password)
+            UserProfile.objects.create(user=user)
             
-        except User.DoesNotExist:
-            pass
+            auth_login(request, user)
+            messages.success(request, f"Welcome, {username}!")
+            return redirect('dashboard')
+
+        except Exception as e:
+            messages.error(request, f"Registration failed: {str(e)}")
+            return render(request, 'quiz/register.html')
+
+    return render(request, 'quiz/register.html')
+
+def login_view(request):
+    """Handle user login"""
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid username or password.")
     
-    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    return render(request, 'quiz/login.html')
 
+@login_required
+def logout_view(request):
+    """Handle user logout"""
+    auth_logout(request)
+    messages.info(request, "You have been logged out.")
+    return redirect('login')
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def logout(request):
-    """Logout user"""
-    request.user.auth_token.delete()
-    return Response({'message': 'Successfully logged out'})
+@login_required
+def dashboard_view(request):
+    """Main dashboard for quiz generation"""
+    return render(request, 'quiz/dashboard.html')
 
+@login_required
+def generate_quiz_view(request):
+    """Handle quiz generation"""
+    if request.method == 'POST':
+        topic = request.POST.get('topic')
+        difficulty = request.POST.get('difficulty')
+        count = int(request.POST.get('count', 5))
+        language = request.POST.get('language', 'en')
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def current_user(request):
-    """Get current logged-in user info"""
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    profile.update_stats()
-    
-    return Response({
-        'id': request.user.id,
-        'username': request.user.username,
-        'email': request.user.email,
-        'name': request.user.first_name or request.user.username,
-        'avatar': profile.avatar.url if profile.avatar else None,
-        'is_admin': profile.is_admin,
-        'stats': {
-            'total_quizzes_taken': profile.total_quizzes_taken,
-            'average_score': round(profile.average_score, 1),
-            'best_score': profile.best_score
-        }
-    })
-
-
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def update_profile(request):
-    """Update user profile"""
-    serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)
-    if serializer.is_valid():
-        user = serializer.save()
-        profile = user.profile
-        return Response({
-            'message': 'Profile updated successfully',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'name': user.first_name or user.username,
-                'avatar': profile.avatar.url if profile.avatar else None,
-                'is_admin': profile.is_admin
-            }
-        })
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def generate_quiz(request):
-    """Generate a new quiz using Gemini AI"""
-    serializer = QuizCreateSerializer(data=request.data)
-    
-    if serializer.is_valid():
-        topic = serializer.validated_data['topic']
-        difficulty = serializer.validated_data['difficulty']
-        count = serializer.validated_data['count']
-        language = serializer.validated_data.get('language', 'en')
-        
         try:
             # Generate questions using Gemini AI
             questions_data = generate_quiz_questions(topic, difficulty, count, language)
@@ -167,55 +118,46 @@ def generate_quiz(request):
                     order=idx + 1
                 )
             
-            quiz_serializer = QuizSerializer(quiz)
-            return Response(quiz_serializer.data, status=status.HTTP_201_CREATED)
-            
+            return redirect('take_quiz', quiz_id=quiz.id)
+
         except Exception as e:
             logger.error(f"Error generating quiz: {str(e)}")
-            return Response(
-                {'error': f'Failed to generate quiz: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            messages.error(request, f"Failed to generate quiz: {str(e)}")
+            return redirect('dashboard')
 
+    return redirect('dashboard')
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def submit_quiz(request):
-    """Submit quiz answers and calculate score"""
-    serializer = QuizSubmitSerializer(data=request.data)
+@login_required
+def take_quiz_view(request, quiz_id):
+    """Render the quiz taking page"""
+    quiz = get_object_or_404(Quiz, id=quiz_id, user=request.user)
+    return render(request, 'quiz/take_quiz.html', {'quiz': quiz})
+
+@login_required
+def submit_quiz_view(request, quiz_id):
+    """Handle quiz submission"""
+    quiz = get_object_or_404(Quiz, id=quiz_id, user=request.user)
     
-    if serializer.is_valid():
-        quiz_id = serializer.validated_data['quiz_id']
-        answers = serializer.validated_data['answers']
-        
-        try:
-            quiz = Quiz.objects.get(id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({'error': 'Quiz not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Calculate score
+    if request.method == 'POST':
         correct_count = 0
         total_questions = quiz.questions.count()
         
-        # Create quiz attempt
+        # Create attempt
         attempt = QuizAttempt.objects.create(
             user=request.user,
             quiz=quiz,
-            score=0,  # Will update
+            score=0,
             total_questions=total_questions,
-            score_percentage=0  # Will update
+            score_percentage=0
         )
         
-        # Process each answer
-        for answer_data in answers:
-            question_id = answer_data['question_id']
-            selected_option = answer_data['selected_option']
+        # Check answers
+        for question in quiz.questions.all():
+            selected_option_index = request.POST.get(f'question_{question.id}')
             
-            try:
-                question = quiz.questions.get(id=question_id)
-                is_correct = question.correct_option == selected_option
+            if selected_option_index is not None:
+                selected_option = int(selected_option_index)
+                is_correct = (selected_option == question.correct_option)
                 
                 if is_correct:
                     correct_count += 1
@@ -226,117 +168,226 @@ def submit_quiz(request):
                     selected_option=selected_option,
                     is_correct=is_correct
                 )
-            except Question.DoesNotExist:
-                continue
-        
-        # Update attempt with final score
+            else:
+                # Handle unanswered questions (optional, currently treating as wrong)
+                UserAnswer.objects.create(
+                    attempt=attempt,
+                    question=question,
+                    selected_option=-1, # -1 for no selection
+                    is_correct=False
+                )
+
+        # Update scores
         score_percentage = int((correct_count / total_questions) * 100) if total_questions > 0 else 0
         attempt.score = correct_count
         attempt.score_percentage = score_percentage
         attempt.save()
-        
-        # Update user profile stats
+
+        # Update profile stats
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
         profile.update_stats()
+
+        return redirect('quiz_result', attempt_id=attempt.id)
+
+    return redirect('dashboard')
+
+@login_required
+def result_view(request, attempt_id):
+    """Show quiz results"""
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+    answers = attempt.answers.select_related('question').all()
+    
+    return render(request, 'quiz/result.html', {
+        'attempt': attempt,
+        'answers': answers,
+        'score': attempt.score,
+        'total_questions': attempt.total_questions
+    })
+
+@login_required
+def certificate_view(request, attempt_id):
+    """Render a printable certificate"""
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+    return render(request, 'quiz/certificate.html', {
+        'attempt': attempt,
+        'final_score': attempt.score_percentage
+    })
+
+@login_required
+def profile_view(request):
+    """User profile and history"""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    history = QuizAttempt.objects.filter(user=request.user).select_related('quiz').order_by('-completed_at')
+    
+    return render(request, 'quiz/profile.html', {
+        'profile': profile,
+        'history': history,
+        'user': request.user
+    })
+
+@login_required
+def edit_profile_view(request):
+    """Edit user profile"""
+    if request.method == 'POST':
+        user = request.user
+        user.first_name = request.POST.get('name', user.first_name)
+        user.email = request.POST.get('email', user.email)
         
-        attempt_serializer = QuizAttemptSerializer(attempt)
-        return Response(attempt_serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class QuizViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for Quiz"""
-    serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        # Users see their own quizzes, admins see all
-        if hasattr(self.request.user, 'profile') and self.request.user.profile.is_admin:
-            return Quiz.objects.all()
-        return Quiz.objects.filter(user=self.request.user)
-    
-    @action(detail=False, methods=['get'])
-    def my_quizzes(self, request):
-        """Get current user's quizzes"""
-        quizzes = Quiz.objects.filter(user=request.user)
-        serializer = self.get_serializer(quizzes, many=True)
-        return Response(serializer.data)
-
-
-class QuizAttemptViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for QuizAttempt"""
-    serializer_class = QuizAttemptSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        # Users see their own attempts, admins see all
-        if hasattr(self.request.user, 'profile') and self.request.user.profile.is_admin:
-            return QuizAttempt.objects.all()
-        return QuizAttempt.objects.filter(user=self.request.user)
-    
-    @action(detail=False, methods=['get'])
-    def my_history(self, request):
-        """Get current user's quiz history"""
-        attempts = QuizAttempt.objects.filter(user=request.user)
-        serializer = self.get_serializer(attempts, many=True)
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'])
-    def stats(self, request):
-        """Get quiz statistics"""
-        attempts = QuizAttempt.objects.filter(user=request.user)
+        # Handle password change if provided
+        new_password = request.POST.get('password')
+        if new_password:
+             user.set_password(new_password)
+             auth_login(request, user) # Keep user logged in
         
-        if not attempts.exists():
-            return Response({
-                'total_attempts': 0,
-                'average_score': 0,
-                'best_score': 0,
-                'total_quizzes': 0
-            })
-        
-        total_attempts = attempts.count()
-        average_score = sum(a.score_percentage for a in attempts) / total_attempts
-        best_score = max(a.score_percentage for a in attempts)
-        total_quizzes = Quiz.objects.filter(user=request.user).count()
-        
-        return Response({
-            'total_attempts': total_attempts,
-            'average_score': round(average_score, 1),
-            'best_score': best_score,
-            'total_quizzes': total_quizzes
-        })
+        # Handle Avatar Upload
+        if 'avatar' in request.FILES:
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.avatar = request.FILES['avatar']
+            profile.save()
+            
+        user.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile')
 
+    return render(request, 'quiz/edit_profile.html', {'user': request.user})
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def admin_dashboard(request):
-    """Get admin dashboard statistics"""
-    # Check if user is admin
-    if not (hasattr(request.user, 'profile') and request.user.profile.is_admin):
-        return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+@login_required
+def admin_dashboard_view(request):
+    """Admin dashboard stats"""
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    from django.contrib.auth.models import User
     
     total_users = User.objects.count()
     total_quizzes = Quiz.objects.count()
     total_attempts = QuizAttempt.objects.count()
     
-    # Recent quiz attempts
-    recent_attempts = QuizAttempt.objects.all()[:10]
-    recent_serializer = QuizAttemptSerializer(recent_attempts, many=True)
-    
-    # Top performers
-    profiles = UserProfile.objects.order_by('-best_score')[:10]
-    top_users = [{
-        'username': p.user.username,
-        'best_score': p.best_score,
-        'average_score': round(p.average_score, 1),
-        'total_quizzes': p.total_quizzes_taken
-    } for p in profiles]
-    
-    return Response({
+    recent_attempts = QuizAttempt.objects.select_related('user', 'quiz').order_by('-completed_at')[:10]
+    top_performers = UserProfile.objects.select_related('user').order_by('-best_score')[:10]
+
+    return render(request, 'quiz/admin_dashboard.html', {
         'total_users': total_users,
         'total_quizzes': total_quizzes,
         'total_attempts': total_attempts,
-        'recent_attempts': recent_serializer.data,
-        'top_performers': top_users
+        'recent_attempts': recent_attempts,
+        'top_performers': top_performers
+    })
+
+
+# Theme Management Views
+
+@login_required
+def theme_list(request):
+    """List all themes"""
+    if not request.user.profile.is_admin:
+        messages.error(request, "You don't have permission to access theme management.")
+        return redirect('dashboard')
+    
+    themes = SiteTheme.objects.all()
+    active_theme = SiteTheme.get_active_theme()
+    
+    return render(request, 'quiz/theme_list.html', {
+        'themes': themes,
+        'active_theme': active_theme
+    })
+
+
+@login_required
+def theme_create(request):
+    """Create a new theme"""
+    if not request.user.profile.is_admin:
+        messages.error(request, "You don't have permission to create themes.")
+        return redirect('dashboard')
+    
+    from .forms import ThemeCustomizationForm
+    
+    if request.method == 'POST':
+        form = ThemeCustomizationForm(request.POST, request.FILES)
+        if form.is_valid():
+            theme = form.save(commit=False)
+            theme.created_by = request.user
+            theme.save()
+            messages.success(request, f"Theme '{theme.name}' created successfully!")
+            return redirect('theme_list')
+    else:
+        form = ThemeCustomizationForm()
+    
+    return render(request, 'quiz/theme_form.html', {
+        'form': form,
+        'title': 'Create New Theme',
+        'button_text': 'Create Theme'
+    })
+
+
+@login_required
+def theme_edit(request, theme_id):
+    """Edit an existing theme"""
+    if not request.user.profile.is_admin:
+        messages.error(request, "You don't have permission to edit themes.")
+        return redirect('dashboard')
+    
+    from .forms import ThemeCustomizationForm
+    theme = get_object_or_404(SiteTheme, pk=theme_id)
+    
+    if request.method == 'POST':
+        form = ThemeCustomizationForm(request.POST, request.FILES, instance=theme)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Theme '{theme.name}' updated successfully!")
+            return redirect('theme_list')
+    else:
+        form = ThemeCustomizationForm(instance=theme)
+    
+    return render(request, 'quiz/theme_form.html', {
+        'form': form,
+        'theme': theme,
+        'title': f'Edit Theme: {theme.name}',
+        'button_text': 'Update Theme'
+    })
+
+
+@login_required
+def theme_delete(request, theme_id):
+    """Delete a theme"""
+    if not request.user.profile.is_admin:
+        messages.error(request, "You don't have permission to delete themes.")
+        return redirect('dashboard')
+    
+    theme = get_object_or_404(SiteTheme, pk=theme_id)
+    
+    if theme.is_active:
+        messages.error(request, "Cannot delete the active theme. Please activate another theme first.")
+        return redirect('theme_list')
+    
+    theme_name = theme.name
+    theme.delete()
+    messages.success(request, f"Theme '{theme_name}' deleted successfully!")
+    return redirect('theme_list')
+
+
+@login_required
+def theme_activate(request, theme_id):
+    """Activate a theme"""
+    if not request.user.profile.is_admin:
+        messages.error(request, "You don't have permission to activate themes.")
+        return redirect('dashboard')
+    
+    theme = get_object_or_404(SiteTheme, pk=theme_id)
+    theme.is_active = True
+    theme.save()  # This will automatically deactivate other themes
+    
+    messages.success(request, f"Theme '{theme.name}' is now active!")
+    return redirect('theme_list')
+
+
+@login_required
+def theme_preview(request, theme_id):
+    """Preview a theme without activating it"""
+    theme = get_object_or_404(SiteTheme, pk=theme_id)
+    
+    return render(request, 'quiz/theme_preview.html', {
+        'theme': theme,
+        'preview_mode': True
     })

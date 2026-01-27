@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Management - MindSpark AI Quiz</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+
+<body class="font-sans antialiased bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+
+    <!-- Animated background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float">
+        </div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'landing' %}" class="flex items-center space-x-2">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-display font-bold text-white">MindSpark AI</span>
+                </a>
+
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'admin_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                        <i class="fas fa-crown mr-2"></i>Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-display font-bold text-white mb-2">
+                <i class="fas fa-palette text-blue-400 mr-3"></i>
+                Theme Management
+            </h1>
+            <p class="text-xl text-gray-300">Customize the look and feel of your entire portal</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for message in messages %}
+            <div
+                class="glass rounded-xl p-4 border {% if message.tags == 'error' %}border-red-500/50 bg-red-500/10{% elif message.tags == 'success' %}border-green-500/50 bg-green-500/10{% else %}border-blue-500/50 bg-blue-500/10{% endif %}">
+                <i
+                    class="fas {% if message.tags == 'error' %}fa-exclamation-circle text-red-400{% elif message.tags == 'success' %}fa-check-circle text-green-400{% else %}fa-info-circle text-blue-400{% endif %} mr-2"></i>
+                <span
+                    class="{% if message.tags == 'error' %}text-red-200{% elif message.tags == 'success' %}text-green-200{% else %}text-blue-200{% endif %}">{{
+                    message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Create New Theme Button -->
+        <div class="mb-8">
+            <a href="{% url 'theme_create' %}"
+                class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+                <i class="fas fa-plus mr-2"></i>Create New Theme
+            </a>
+        </div>
+
+        <!-- Active Theme -->
+        {% if active_theme %}
+        <div class="glass rounded-3xl p-8 mb-8 border-2 border-green-500/50 shadow-2xl shadow-green-500/20">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/50">
+                        <i class="fas fa-check text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">{{ active_theme.name }}</h2>
+                        <p class="text-green-400 font-semibold">
+                            <i class="fas fa-circle text-xs mr-1 animate-pulse"></i>
+                            Currently Active
+                        </p>
+                    </div>
+                </div>
+                <a href="{% url 'theme_edit' active_theme.id %}"
+                    class="px-6 py-3 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-xl text-blue-300 font-semibold transition-all hover:scale-105">
+                    <i class="fas fa-edit mr-2"></i>Edit Theme
+                </a>
+            </div>
+
+            <!-- Theme Preview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass rounded-xl p-4">
+                    <p class="text-xs text-gray-400 mb-2">Background</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg border border-white/20"
+                            style="background: {{ active_theme.background_color_1 }}"></div>
+                        <span class="text-sm text-white">{{ active_theme.get_background_type_display }}</span>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <p class="text-xs text-gray-400 mb-2">Primary Color</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg border border-white/20"
+                            style="background: {{ active_theme.primary_color }}"></div>
+                        <span class="text-sm text-white">{{ active_theme.primary_color }}</span>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <p class="text-xs text-gray-400 mb-2">Font Family</p>
+                    <span class="text-sm text-white">{{ active_theme.get_font_family_display }}</span>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <p class="text-xs text-gray-400 mb-2">Animation</p>
+                    <span class="text-sm text-white">{{ active_theme.get_animation_speed_display }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- All Themes -->
+        <div class="glass rounded-3xl p-8 shadow-2xl">
+            <h2 class="text-2xl font-bold text-white mb-6">
+                <i class="fas fa-swatchbook text-purple-400 mr-2"></i>
+                All Themes
+            </h2>
+
+            {% if themes %}
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for theme in themes %}
+                <div
+                    class="glass rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all {% if theme.is_active %}ring-2 ring-green-500{% endif %}">
+                    <!-- Theme Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-white mb-1">{{ theme.name }}</h3>
+                            <p class="text-xs text-gray-400">
+                                Updated {{ theme.updated_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        {% if theme.is_active %}
+                        <span
+                            class="px-2 py-1 bg-green-500/20 border border-green-500/50 rounded-lg text-green-300 text-xs font-semibold">
+                            Active
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Color Preview -->
+                    <div class="flex gap-2 mb-4">
+                        <div class="w-12 h-12 rounded-lg border border-white/20"
+                            style="background: {{ theme.primary_color }}" title="Primary"></div>
+                        <div class="w-12 h-12 rounded-lg border border-white/20"
+                            style="background: {{ theme.secondary_color }}" title="Secondary"></div>
+                        <div class="w-12 h-12 rounded-lg border border-white/20"
+                            style="background: {{ theme.accent_color }}" title="Accent"></div>
+                    </div>
+
+                    <!-- Theme Info -->
+                    <div class="space-y-2 mb-4 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Background:</span>
+                            <span class="text-white">{{ theme.get_background_type_display }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Font:</span>
+                            <span class="text-white">{{ theme.font_family|title }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        {% if not theme.is_active %}
+                        <a href="{% url 'theme_activate' theme.id %}"
+                            class="flex-1 px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-300 text-sm font-semibold text-center transition-all">
+                            <i class="fas fa-check mr-1"></i>Activate
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'theme_edit' theme.id %}"
+                            class="flex-1 px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-300 text-sm font-semibold text-center transition-all">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </a>
+                        {% if not theme.is_active %}
+                        <a href="{% url 'theme_delete' theme.id %}"
+                            onclick="return confirm('Are you sure you want to delete this theme?')"
+                            class="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 text-sm font-semibold transition-all">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-palette text-gray-500 text-6xl mb-4"></i>
+                <p class="text-gray-400 text-lg mb-4">No themes found</p>
+                <a href="{% url 'theme_create' %}"
+                    class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:scale-105 transition-all">
+                    Create Your First Theme
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</body>
+
+</html>

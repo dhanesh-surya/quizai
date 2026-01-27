@@ -1,26 +1,29 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from . import views
 
-router = DefaultRouter()
-router.register(r'quizzes', views.QuizViewSet, basename='quiz')
-router.register(r'attempts', views.QuizAttemptViewSet, basename='attempt')
-
 urlpatterns = [
-    # Authentication endpoints
-    path('auth/register/', views.register, name='register'),
-    path('auth/login/', views.login, name='login'),
-    path('auth/logout/', views.logout, name='logout'),
-    path('auth/me/', views.current_user, name='current_user'),
-    path('auth/update-profile/', views.update_profile, name='update_profile'),
+    # Auth Views
+    path('', views.landing_page, name='landing'),
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     
-    # Quiz endpoints
-    path('quiz/generate/', views.generate_quiz, name='generate_quiz'),
-    path('quiz/submit/', views.submit_quiz, name='submit_quiz'),
+    # App Views
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('generate/', views.generate_quiz_view, name='generate_quiz'),
+    path('take/<int:quiz_id>/', views.take_quiz_view, name='take_quiz'),
+    path('submit/<int:quiz_id>/', views.submit_quiz_view, name='quiz_submit'),
+    path('result/<int:attempt_id>/', views.result_view, name='quiz_result'),
+    path('certificate/<int:attempt_id>/', views.certificate_view, name='certificate'),
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.edit_profile_view, name='edit_profile'),
+    path('admin-dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
-    # Admin endpoint
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    
-    # Router URLs (quizzes, attempts with their viewsets)
-    path('', include(router.urls)),
+    # Theme Management
+    path('themes/', views.theme_list, name='theme_list'),
+    path('themes/create/', views.theme_create, name='theme_create'),
+    path('themes/<int:theme_id>/edit/', views.theme_edit, name='theme_edit'),
+    path('themes/<int:theme_id>/delete/', views.theme_delete, name='theme_delete'),
+    path('themes/<int:theme_id>/activate/', views.theme_activate, name='theme_activate'),
+    path('themes/<int:theme_id>/preview/', views.theme_preview, name='theme_preview'),
 ]

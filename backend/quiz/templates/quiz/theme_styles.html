@@ -1,0 +1,51 @@
+﻿{% if active_theme %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{% if active_theme.font_family %}
+<link href="https://fonts.googleapis.com/css2?family={{ active_theme.font_family|title }}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+{% endif %}
+
+<style>
+:root {
+    --theme-primary: {{ active_theme.primary_color }};
+    --theme-secondary: {{ active_theme.secondary_color }};
+    --theme-accent: {{ active_theme.accent_color }};
+    --theme-text-primary: {{ active_theme.text_primary }};
+    --theme-text-secondary: {{ active_theme.text_secondary }};
+    --theme-text-muted: {{ active_theme.text_muted }};
+    --theme-font-family: {{ active_theme.get_font_family_css }};
+    --theme-font-size-base: {{ active_theme.font_size_base }}px;
+    --theme-font-size-heading: {{ active_theme.font_size_heading }}px;
+    --theme-line-height: {{ active_theme.line_height }};
+    --theme-glass-bg-opacity: {{ active_theme.card_background_opacity }};
+    --theme-glass-border-opacity: {{ active_theme.card_border_opacity }};
+    --theme-glass-blur: {{ active_theme.card_blur_amount }}px;
+    --theme-navbar-opacity: {{ active_theme.navbar_opacity }};
+    --theme-navbar-bg: {{ active_theme.navbar_background }};
+    --theme-navbar-blur: {% if active_theme.navbar_blur %}blur(16px){% else %}blur(0px){% endif %};
+}
+
+body {
+    {% if active_theme.background_type == 'solid' %}
+    background: {{ active_theme.background_color_1 }} !important;
+    {% elif active_theme.background_type == 'gradient' %}
+    background: linear-gradient(135deg, {{ active_theme.background_color_1 }}, {{ active_theme.background_color_2 }}, {{ active_theme.background_color_3 }}) !important;
+    {% endif %}
+    font-family: var(--theme-font-family) !important;
+    font-size: var(--theme-font-size-base) !important;
+    line-height: var(--theme-line-height) !important;
+    color: var(--theme-text-primary) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--theme-font-family) !important;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary), var(--theme-accent)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+</style>
+{% endif %}

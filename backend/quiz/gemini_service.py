@@ -17,7 +17,7 @@ def generate_quiz_questions(topic: str, difficulty: str, count: int, language: s
     Args:
         topic: The topic for the quiz
         difficulty: Easy, Medium, or Hard
-        count: Number of questions to generate (3-20)
+        count: Number of questions to generate (1-100)
         language: 'en' for English or 'hi' for Hindi
     
     Returns:

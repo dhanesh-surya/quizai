@@ -10,3 +10,4 @@ django-jazzmin
 gunicorn
 whitenoise
 Pillow>=10.0.0
+django-components>=0.90

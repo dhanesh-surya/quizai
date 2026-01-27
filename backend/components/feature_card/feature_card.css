@@ -1,0 +1,8 @@
+/* Feature Card Component Styles */
+.feature-card-hover {
+    transition: all 0.3s ease;
+}
+
+.feature-card-hover:hover {
+    transform: translateY(-5px);
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion - {{ attempt.quiz.topic }}</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Montserrat:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .certificate-container {
+            width: 900px;
+            height: 640px;
+            background-color: #fff;
+            position: relative;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            border: 20px solid #1e293b;
+        }
+
+        .border-inner {
+            border: 2px solid #caa43d;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #caa43d;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .content {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 80%;
+        }
+
+        .presented-to {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .recipient-name {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4.5rem;
+            color: #1e293b;
+            margin: 0.5rem 0 2rem 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .description strong {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding: 0 4rem;
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2rem;
+            color: #1e293b;
+            border-bottom: 1px solid #1e293b;
+            padding: 0 2rem 5px 2rem;
+            margin-bottom: 5px;
+        }
+
+        .signature-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 1px;
+        }
+
+        .date-block {
+            text-align: center;
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 40px;
+            font-family: 'Cinzel', serif;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #caa43d;
+            color: #caa43d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+            background-color: #fff;
+        }
+
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .certificate-container {
+                box-shadow: none;
+                width: 100%;
+                height: 100vh;
+                border: none;
+                padding: 0;
+            }
+
+            .border-inner {
+                margin: 20px;
+                height: calc(100% - 40px);
+                border: 10px solid #1e293b;
+                outline: 2px solid #caa43d;
+                outline-offset: -14px;
+            }
+
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
+        .btn {
+            background-color: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="no-print">
+        <a href="javascript:window.print()" class="btn">Print Certificate</a>
+    </div>
+
+    <div class="certificate-container">
+        <div class="border-inner">
+            <div class="seal">
+                MindSpark<br>Certified
+            </div>
+
+            <div class="header">
+                <h1 class="title">Certificate of Completion</h1>
+                <div class="subtitle">MindSpark AI Quiz Platform</div>
+            </div>
+
+            <div class="content">
+                <div class="presented-to">This certificate is proudly presented to</div>
+                <div class="recipient-name">{{ attempt.user.first_name|default:attempt.user.username }}</div>
+
+                <p class="description">
+                    For successfully completing the timer-based assessment on<br>
+                    <strong>{{ attempt.quiz.topic }}</strong><br>
+                    Difficulty: <strong>{{ attempt.quiz.difficulty }}</strong> • Score: <strong>{{ final_score
+                        }}%</strong>
+                </p>
+            </div>
+
+            <div class="footer">
+                <div class="date-block">
+                    <div class="signature">{{ attempt.completed_at|date:"F d, Y" }}</div>
+                    <div class="signature-label">Date Completed</div>
+                </div>
+
+                <div class="signature-block">
+                    <div class="signature">MindSpark AI</div>
+                    <div class="signature-label">Verified By</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

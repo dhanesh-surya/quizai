@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results - MindSpark AI Quiz</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    <!-- Apply Theme from Django Admin -->
+    {% include 'quiz/theme_styles.html' %}
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--theme-primary)',
+                        secondary: 'var(--theme-secondary)',
+                        accent: 'var(--theme-accent)',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Outfit', 'Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-sans antialiased min-h-screen text-white">
+
+    <!-- Animated background elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float">
+        </div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 4s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-float"
+            style="animation-delay: 3s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'landing' %}" class="flex items-center space-x-2">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-display font-bold text-white">MindSpark AI</span>
+                </a>
+
+                <a href="{% url 'dashboard' %}"
+                    class="px-4 py-2 glass rounded-lg text-gray-300 hover:text-white hover:bg-white/20 transition-all">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Score Card -->
+        <div class="glass rounded-3xl p-8 md:p-12 mb-8 text-center shadow-2xl border border-white/20">
+            <!-- Confetti Animation (if high score) -->
+            {% if attempt.score_percentage >= 70 %}
+            <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+                <div class="confetti"></div>
+            </div>
+            {% endif %}
+
+            <!-- Icon -->
+            <div class="relative inline-block mb-6">
+                {% if attempt.score_percentage >= 70 %}
+                <div
+                    class="w-32 h-32 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-500/50 animate-pulse-glow">
+                    <i class="fas fa-trophy text-white text-6xl"></i>
+                </div>
+                {% elif attempt.score_percentage >= 40 %}
+                <div
+                    class="w-32 h-32 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-blue-500/50">
+                    <i class="fas fa-star text-white text-6xl"></i>
+                </div>
+                {% else %}
+                <div
+                    class="w-32 h-32 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-orange-500/50">
+                    <i class="fas fa-redo text-white text-6xl"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">
+                {% if attempt.score_percentage >= 70 %}
+                🎉 Excellent Work!
+                {% elif attempt.score_percentage >= 40 %}
+                👍 Good Job!
+                {% else %}
+                💪 Keep Practicing!
+                {% endif %}
+            </h1>
+
+            <!-- Quiz Info -->
+            <p class="text-xl text-gray-300 mb-8">
+                <span class="font-semibold">{{ attempt.quiz.topic }}</span>
+                <span class="mx-2">•</span>
+                <span
+                    class="px-3 py-1 rounded-lg {% if attempt.quiz.difficulty == 'Easy' %}bg-green-500/20 text-green-400{% elif attempt.quiz.difficulty == 'Medium' %}bg-yellow-500/20 text-yellow-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+                    {{ attempt.quiz.difficulty }}
+                </span>
+            </p>
+
+            <!-- Score -->
+            <div class="mb-8">
+                <div
+                    class="text-8xl md:text-9xl font-black mb-4 {% if attempt.score_percentage >= 70 %}bg-gradient-to-r from-green-400 to-emerald-400{% elif attempt.score_percentage >= 40 %}bg-gradient-to-r from-blue-400 to-cyan-400{% else %}bg-gradient-to-r from-orange-400 to-red-400{% endif %} bg-clip-text text-transparent">
+                    {{ attempt.score_percentage }}%
+                </div>
+                <p class="text-2xl text-gray-300">
+                    You scored <span class="font-bold text-white">{{ score }}</span> out of <span
+                        class="font-bold text-white">{{ total_questions }}</span>
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'dashboard' %}"
+                    class="px-8 py-4 glass rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 hover:bg-white/20 text-white">
+                    <i class="fas fa-home mr-2"></i>
+                    Back to Dashboard
+                </a>
+                <a href="{% url 'certificate' attempt.id %}" target="_blank"
+                    class="px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50 text-white">
+                    <i class="fas fa-certificate mr-2"></i>
+                    Download Certificate
+                </a>
+            </div>
+        </div>
+
+        <!-- Review Answers -->
+        <div class="glass rounded-3xl p-8 shadow-2xl border border-white/20">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-display font-bold text-white">
+                    <i class="fas fa-clipboard-check text-blue-400 mr-3"></i>
+                    Review Answers
+                </h2>
+                <span class="px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 font-semibold">
+                    {{ answers|length }} Questions
+                </span>
+            </div>
+
+            <div class="space-y-8">
+                {% for answer in answers %}
+                <div class="glass rounded-2xl p-6 border border-white/10">
+                    <!-- Question Number & Text -->
+                    <div class="flex items-start gap-4 mb-6">
+                        <div
+                            class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg">
+                            {{ forloop.counter }}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-lg font-semibold text-white leading-relaxed">
+                                {{ answer.question.question_text|linebreaksbr }}
+                            </p>
+                        </div>
+                        <!-- Correct/Wrong Badge -->
+                        {% if answer.is_correct %}
+                        <div class="flex-shrink-0 px-3 py-1 bg-green-500/20 border border-green-500/50 rounded-lg">
+                            <i class="fas fa-check-circle text-green-400 mr-1"></i>
+                            <span class="text-green-300 font-semibold text-sm">Correct</span>
+                        </div>
+                        {% else %}
+                        <div class="flex-shrink-0 px-3 py-1 bg-red-500/20 border border-red-500/50 rounded-lg">
+                            <i class="fas fa-times-circle text-red-400 mr-1"></i>
+                            <span class="text-red-300 font-semibold text-sm">Wrong</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Options -->
+                    <div class="space-y-3 mb-6">
+                        {% for option in answer.question.options %}
+                        {% if forloop.counter0 == answer.question.correct_option %}
+                        <!-- Correct Answer -->
+                        <div
+                            class="p-4 bg-green-500/10 border-2 border-green-500/50 rounded-xl flex items-center justify-between">
+                            <span class="text-white font-medium">{{ option }}</span>
+                            <span class="px-3 py-1 bg-green-500/30 rounded-lg text-green-300 font-bold text-sm">
+                                <i class="fas fa-check mr-1"></i>Correct Answer
+                            </span>
+                        </div>
+                        {% elif forloop.counter0 == answer.selected_option and not answer.is_correct %}
+                        <!-- User's Wrong Answer -->
+                        <div
+                            class="p-4 bg-red-500/10 border-2 border-red-500/50 rounded-xl flex items-center justify-between">
+                            <span class="text-white font-medium">{{ option }}</span>
+                            <span class="px-3 py-1 bg-red-500/30 rounded-lg text-red-300 font-bold text-sm">
+                                <i class="fas fa-times mr-1"></i>Your Answer
+                            </span>
+                        </div>
+                        {% else %}
+                        <!-- Other Options -->
+                        <div class="p-4 bg-white/5 border border-white/10 rounded-xl opacity-60">
+                            <span class="text-gray-400">{{ option }}</span>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Explanation -->
+                    <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-lightbulb text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-blue-300 mb-2">Explanation</p>
+                                <p class="text-gray-300 leading-relaxed">
+                                    {{ answer.question.explanation|linebreaksbr }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-gray-500 text-6xl mb-4"></i>
+                    <p class="text-gray-400 text-lg">No answers found for this attempt.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'dashboard' %}"
+                class="inline-block px-8 py-4 glass rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 hover:bg-white/20 text-white">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Take Another Quiz
+            </a>
+        </div>
+    </div>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</body>
+
+</html>

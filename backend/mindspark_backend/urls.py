@@ -6,7 +6,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('quiz.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('', include('quiz.urls')),
 ]
 
 from django.conf import settings

@@ -1,0 +1,56 @@
+{% extends 'quiz/base.html' %}
+
+{% block title %}Admin Dashboard - MindSpark AI{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="page-header">
+        <h1 class="page-title">Admin Dashboard</h1>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_quizzes }}</div>
+            <div class="stat-label">Total Quizzes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_attempts }}</div>
+            <div class="stat-label">Total Attempts</div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+        <div class="card">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Recent Activity</h2>
+            <!-- List recent attempts -->
+            <ul style="list-style: none; padding: 0;">
+                {% for attempt in recent_attempts %}
+                <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="font-weight: 500;">{{ attempt.user.username }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        completed {{ attempt.quiz.topic }} with {{ attempt.score_percentage }}%
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Top Performers</h2>
+            <ul style="list-style: none; padding: 0;">
+                {% for profile in top_performers %}
+                <li
+                    style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
+                    <span>{{ profile.user.username }}</span>
+                    <span style="color: var(--success); font-weight: 600;">{{ profile.best_score }}%</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

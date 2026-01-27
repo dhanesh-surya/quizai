@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - MindSpark AI Quiz</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+
+<body class="font-sans antialiased bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+
+    <!-- Animated background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float">
+        </div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'landing' %}" class="flex items-center space-x-2">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-display font-bold text-white">MindSpark AI</span>
+                </a>
+
+                <a href="{% url 'theme_list' %}" class="text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Themes
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-display font-bold text-white mb-2">
+                <i class="fas fa-palette text-blue-400 mr-3"></i>
+                {{ title }}
+            </h1>
+            <p class="text-xl text-gray-300">Customize every aspect of your portal's appearance</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Basic Settings -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+                    Basic Settings
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-tag mr-2"></i>{{ form.name.label }}
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.is_active }}
+                            <span class="ml-3 text-gray-300">{{ form.is_active.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background Settings -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-image text-purple-400 mr-3"></i>
+                    Background Settings
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_type.label }}
+                        </label>
+                        {{ form.background_type }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_color_1.label }}
+                        </label>
+                        {{ form.background_color_1 }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_color_2.label }}
+                        </label>
+                        {{ form.background_color_2 }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_color_3.label }}
+                        </label>
+                        {{ form.background_color_3 }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_opacity.label }}
+                        </label>
+                        {{ form.background_opacity }}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.background_image.label }}
+                        </label>
+                        {{ form.background_image }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Color Scheme -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-palette text-pink-400 mr-3"></i>
+                    Color Scheme
+                </h2>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.primary_color.label }}
+                        </label>
+                        {{ form.primary_color }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.secondary_color.label }}
+                        </label>
+                        {{ form.secondary_color }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.accent_color.label }}
+                        </label>
+                        {{ form.accent_color }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.text_primary.label }}
+                        </label>
+                        {{ form.text_primary }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.text_secondary.label }}
+                        </label>
+                        {{ form.text_secondary }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.text_muted.label }}
+                        </label>
+                        {{ form.text_muted }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Bar -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-bars text-cyan-400 mr-3"></i>
+                    Navigation Bar
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.navbar_background.label }}
+                        </label>
+                        {{ form.navbar_background }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.navbar_text.label }}
+                        </label>
+                        {{ form.navbar_text }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.navbar_opacity.label }}
+                        </label>
+                        {{ form.navbar_opacity }}
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.navbar_blur }}
+                            <span class="ml-3 text-gray-300">{{ form.navbar_blur.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-font text-yellow-400 mr-3"></i>
+                    Typography
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.font_family.label }}
+                        </label>
+                        {{ form.font_family }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.line_height.label }}
+                        </label>
+                        {{ form.line_height }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.font_size_base.label }}
+                        </label>
+                        {{ form.font_size_base }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.font_size_heading.label }}
+                        </label>
+                        {{ form.font_size_heading }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card/Glass Effects -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-square text-green-400 mr-3"></i>
+                    Card & Glass Effects
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.card_background_opacity.label }}
+                        </label>
+                        {{ form.card_background_opacity }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.card_border_opacity.label }}
+                        </label>
+                        {{ form.card_border_opacity }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.card_blur_amount.label }}
+                        </label>
+                        {{ form.card_blur_amount }}
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.card_shadow }}
+                            <span class="ml-3 text-gray-300">{{ form.card_shadow.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-mouse-pointer text-orange-400 mr-3"></i>
+                    Button Styles
+                </h2>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.button_style.label }}
+                        </label>
+                        {{ form.button_style }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.button_rounded.label }}
+                        </label>
+                        {{ form.button_rounded }}
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.button_shadow }}
+                            <span class="ml-3 text-gray-300">{{ form.button_shadow.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animations -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-magic text-red-400 mr-3"></i>
+                    Animations & Effects
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.animation_speed.label }}
+                        </label>
+                        {{ form.animation_speed }}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            {{ form.orb_opacity.label }}
+                        </label>
+                        {{ form.orb_opacity }}
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.enable_hover_effects }}
+                            <span class="ml-3 text-gray-300">{{ form.enable_hover_effects.label }}</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.enable_page_transitions }}
+                            <span class="ml-3 text-gray-300">{{ form.enable_page_transitions.label }}</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.enable_floating_orbs }}
+                            <span class="ml-3 text-gray-300">{{ form.enable_floating_orbs.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced -->
+            <div class="glass rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-code text-indigo-400 mr-3"></i>
+                    Advanced Customization
+                </h2>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        {{ form.custom_css.label }}
+                    </label>
+                    {{ form.custom_css }}
+                    <p class="mt-2 text-sm text-gray-400">Add custom CSS code for advanced styling</p>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-4 justify-end">
+                <a href="{% url 'theme_list' %}"
+                    class="px-8 py-4 glass rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 hover:bg-white/20 text-white">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit"
+                    class="px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+                    <i class="fas fa-save mr-2"></i>{{ button_text }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</body>
+
+</html>

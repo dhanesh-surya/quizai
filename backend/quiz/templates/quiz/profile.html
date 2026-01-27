@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - MindSpark AI Quiz</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    <!-- Apply Theme from Django Admin -->
+    {% include 'quiz/theme_styles.html' %}
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--theme-primary)',
+                        secondary: 'var(--theme-secondary)',
+                        accent: 'var(--theme-accent)',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Outfit', 'Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-sans antialiased min-h-screen text-white">
+
+    <!-- Animated background elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float">
+        </div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"
+            style="animation-delay: 4s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-float"
+            style="animation-delay: 3s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'landing' %}" class="flex items-center space-x-2">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/50">
+                            <i class="fas fa-brain text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-display font-bold text-white">MindSpark AI</span>
+                    </a>
+
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-home mr-2"></i>Dashboard
+                        </a>
+                        <a href="{% url 'profile' %}" class="text-white font-semibold border-b-2 border-blue-500 pb-1">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        {% if user.profile.is_admin %}
+                        <a href="{% url 'admin_dashboard' %}" class="text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-crown mr-2"></i>Admin
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'logout' %}"
+                        class="px-4 py-2 glass rounded-lg text-gray-300 hover:text-white hover:bg-white/20 transition-all">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Profile Header -->
+        <div class="glass rounded-3xl p-8 mb-8 shadow-2xl">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <!-- Avatar -->
+                <div class="relative">
+                    {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Profile"
+                        class="w-32 h-32 rounded-2xl object-cover border-4 border-white/20 shadow-lg">
+                    {% else %}
+                    <div
+                        class="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center border-4 border-white/20 shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-user text-white text-5xl"></i>
+                    </div>
+                    {% endif %}
+                    <div
+                        class="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center border-4 border-slate-900">
+                        <i class="fas fa-check text-white text-sm"></i>
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-4xl font-display font-bold text-white mb-2">
+                        {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username
+                        }}{% endif %}
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-4">
+                        <i class="fas fa-envelope mr-2 text-blue-400"></i>{{ user.email }}
+                    </p>
+                    <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                        <span
+                            class="px-3 py-1 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 text-sm">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Joined {{ user.date_joined|date:"M Y" }}
+                        </span>
+                        {% if user.profile.is_admin %}
+                        <span
+                            class="px-3 py-1 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-yellow-300 text-sm">
+                            <i class="fas fa-crown mr-1"></i>
+                            Admin
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Edit Button -->
+                <a href="{% url 'edit_profile' %}"
+                    class="px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+                    <i class="fas fa-edit mr-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Quizzes Taken -->
+            <div
+                class="glass rounded-2xl p-6 hover:scale-105 transition-transform duration-300 border border-white/20 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                            {{ user.profile.total_quizzes_taken|default:"0" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-gray-300 font-semibold">Quizzes Taken</div>
+                <div class="text-xs text-gray-400 mt-1">Total attempts completed</div>
+            </div>
+
+            <!-- Average Score -->
+            <div
+                class="glass rounded-2xl p-6 hover:scale-105 transition-transform duration-300 border border-white/20 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/50">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            {{ user.profile.average_score|floatformat:1|default:"0" }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="text-gray-300 font-semibold">Average Score</div>
+                <div class="text-xs text-gray-400 mt-1">Your overall performance</div>
+            </div>
+
+            <!-- Best Score -->
+            <div
+                class="glass rounded-2xl p-6 hover:scale-105 transition-transform duration-300 border border-white/20 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/50">
+                        <i class="fas fa-trophy text-white text-2xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                            {{ user.profile.best_score|default:"0" }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="text-gray-300 font-semibold">Best Score</div>
+                <div class="text-xs text-gray-400 mt-1">Your highest achievement</div>
+            </div>
+        </div>
+
+        <!-- Quiz History -->
+        <div class="glass rounded-3xl p-8 shadow-2xl border border-white/20">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-display font-bold text-white">
+                    <i class="fas fa-history text-blue-400 mr-3"></i>
+                    Quiz History
+                </h2>
+                {% if history %}
+                <span
+                    class="px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 text-sm font-semibold">
+                    {{ history|length }} Total
+                </span>
+                {% endif %}
+            </div>
+
+            {% if history %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
+                                <i class="fas fa-book mr-2"></i>Topic
+                            </th>
+                            <th class="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
+                                <i class="fas fa-calendar mr-2"></i>Date
+                            </th>
+                            <th class="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
+                                <i class="fas fa-chart-bar mr-2"></i>Score
+                            </th>
+                            <th class="text-left py-4 px-4 text-gray-400 font-semibold text-sm">
+                                <i class="fas fa-cog mr-2"></i>Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in history %}
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-white">{{ attempt.quiz.topic }}</div>
+                                <div class="text-sm text-gray-400 mt-1">
+                                    <span
+                                        class="px-2 py-1 rounded {% if attempt.quiz.difficulty == 'Easy' %}bg-green-500/20 text-green-400{% elif attempt.quiz.difficulty == 'Medium' %}bg-yellow-500/20 text-yellow-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+                                        {{ attempt.quiz.difficulty }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-gray-300">
+                                {{ attempt.completed_at|date:"M d, Y" }}
+                                <div class="text-xs text-gray-400">{{ attempt.completed_at|date:"g:i A" }}</div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div
+                                    class="inline-flex items-center px-3 py-2 rounded-lg {% if attempt.score_percentage >= 70 %}bg-green-500/20 border border-green-500/50{% elif attempt.score_percentage >= 40 %}bg-blue-500/20 border border-blue-500/50{% else %}bg-red-500/20 border border-red-500/50{% endif %}">
+                                    <i
+                                        class="fas {% if attempt.score_percentage >= 70 %}fa-check-circle text-green-400{% elif attempt.score_percentage >= 40 %}fa-info-circle text-blue-400{% else %}fa-times-circle text-red-400{% endif %} mr-2"></i>
+                                    <span
+                                        class="font-bold {% if attempt.score_percentage >= 70 %}text-green-300{% elif attempt.score_percentage >= 40 %}text-blue-300{% else %}text-red-300{% endif %}">
+                                        {{ attempt.score_percentage }}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex gap-2">
+                                    <a href="{% url 'quiz_result' attempt.id %}"
+                                        class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-300 text-sm font-semibold transition-all hover:scale-105">
+                                        <i class="fas fa-eye mr-1"></i>Review
+                                    </a>
+                                    <a href="{% url 'certificate' attempt.id %}" target="_blank"
+                                        class="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-300 text-sm font-semibold transition-all hover:scale-105">
+                                        <i class="fas fa-certificate mr-1"></i>Certificate
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <div
+                    class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/50">
+                    <i class="fas fa-clipboard-list text-white text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">No Quizzes Yet</h3>
+                <p class="text-gray-400 mb-6">Start your learning journey by taking your first quiz!</p>
+                <a href="{% url 'dashboard' %}"
+                    class="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50">
+                    <i class="fas fa-play-circle mr-2"></i>Start Your First Quiz
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</body>
+
+</html>
