@@ -2,8 +2,8 @@
 # Exit on error
 set -o errexit
 
-# Switch to backend directory (if not already there)
-cd backend || true
+# Upgrade pip
+pip install --upgrade pip
 
 # Install dependencies
 pip install -r requirements.txt
