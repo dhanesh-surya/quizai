@@ -145,9 +145,13 @@ class RegisterSerializer(serializers.Serializer):
         admin_code = validated_data.pop('admin_code', None)
         user = User.objects.create_user(**validated_data)
         
-        # Create user profile
+        # UserProfile is automatically created by the post_save signal
+        # Update the profile with admin status if needed
         is_admin = admin_code == 'admin123'
-        UserProfile.objects.create(user=user, is_admin=is_admin)
+        if is_admin:
+            profile = user.profile
+            profile.is_admin = True
+            profile.save()
         
         return user
 

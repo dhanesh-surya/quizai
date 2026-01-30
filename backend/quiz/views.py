@@ -41,7 +41,7 @@ def register_view(request):
                 return render(request, 'quiz/register.html')
 
             user = User.objects.create_user(username=username, email=email, password=password)
-            UserProfile.objects.create(user=user)
+            # UserProfile is automatically created by the post_save signal
             
             auth_login(request, user)
             messages.success(request, f"Welcome, {username}!")
