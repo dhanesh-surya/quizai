@@ -43,7 +43,8 @@ def register_view(request):
             user = User.objects.create_user(username=username, email=email, password=password)
             # UserProfile is automatically created by the post_save signal
             
-            auth_login(request, user)
+            # Specify the backend explicitly since multiple backends are configured
+            auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Welcome, {username}!")
             return redirect('dashboard')
 
