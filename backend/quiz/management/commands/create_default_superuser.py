@@ -16,24 +16,55 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Get superuser credentials from environment variables
         email = os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@quizai.com')
-        password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+        password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'QuizAI@Admin2026')
         username = os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin')
 
+        self.stdout.write(f'Attempting to create superuser: {username} ({email})')
+
         try:
-            # Check if superuser already exists
+            # Check if any superuser already exists
             if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
                 self.stdout.write(
-                    self.style.WARNING(f'Superuser with email "{email}" already exists. Skipping creation.')
+                    self.style.WARNING(f'⚠️ User with email "{email}" already exists.')
                 )
+                # Update to superuser and set password if not already
+                if not user.is_superuser:
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.set_password(password)
+                    user.save()
+                    self.stdout.write(
+                        self.style.SUCCESS(f'✅ Updated user "{username}" to superuser!')
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(f'User "{username}" is already a superuser. Skipping.')
+                    )
                 return
 
             if User.objects.filter(username=username).exists():
+                user = User.objects.get(username=username)
                 self.stdout.write(
-                    self.style.WARNING(f'User with username "{username}" already exists. Skipping creation.')
+                    self.style.WARNING(f'⚠️ User with username "{username}" already exists.')
                 )
+                # Update to superuser and set password
+                if not user.is_superuser:
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.email = email
+                    user.set_password(password)
+                    user.save()
+                    self.stdout.write(
+                        self.style.SUCCESS(f'✅ Updated user "{username}" to superuser!')
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(f'User "{username}" is already a superuser. Skipping.')
+                    )
                 return
 
-            # Create superuser
+            # Create new superuser
             user = User.objects.create_superuser(
                 username=username,
                 email=email,
@@ -47,14 +78,22 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f'   Email: {email}')
             )
             self.stdout.write(
+                self.style.SUCCESS(f'   Username: {username}')
+            )
+            self.stdout.write(
                 self.style.SUCCESS(f'   You can now login at /admin/')
             )
 
         except IntegrityError as e:
             self.stdout.write(
-                self.style.WARNING(f'Superuser already exists or integrity error: {e}')
+                self.style.ERROR(f'❌ Integrity error creating superuser: {e}')
+            )
+            self.stdout.write(
+                self.style.WARNING('Try running migrations first: python manage.py migrate')
             )
         except Exception as e:
             self.stdout.write(
                 self.style.ERROR(f'❌ Error creating superuser: {e}')
             )
+            import traceback
+            self.stdout.write(traceback.format_exc())
