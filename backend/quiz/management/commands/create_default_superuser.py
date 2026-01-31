@@ -26,7 +26,7 @@ class Command(BaseCommand):
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
                 self.stdout.write(
-                    self.style.WARNING(f'⚠️ User with email "{email}" already exists.')
+                    self.style.WARNING(f'[WARNING] User with email "{email}" already exists.')
                 )
                 # Update to superuser and set password if not already
                 if not user.is_superuser:
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             if User.objects.filter(username=username).exists():
                 user = User.objects.get(username=username)
                 self.stdout.write(
-                    self.style.WARNING(f'⚠️ User with username "{username}" already exists.')
+                    self.style.WARNING(f'[WARNING] User with username "{username}" already exists.')
                 )
                 # Update to superuser and set password
                 if not user.is_superuser:
@@ -72,7 +72,7 @@ class Command(BaseCommand):
             )
             
             self.stdout.write(
-                self.style.SUCCESS(f'✅ Superuser "{username}" created successfully!')
+                self.style.SUCCESS(f'[SUCCESS] Superuser "{username}" created successfully!')
             )
             self.stdout.write(
                 self.style.SUCCESS(f'   Email: {email}')
@@ -86,14 +86,14 @@ class Command(BaseCommand):
 
         except IntegrityError as e:
             self.stdout.write(
-                self.style.ERROR(f'❌ Integrity error creating superuser: {e}')
+                self.style.ERROR(f'[ERROR] Integrity error creating superuser: {e}')
             )
             self.stdout.write(
                 self.style.WARNING('Try running migrations first: python manage.py migrate')
             )
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR(f'❌ Error creating superuser: {e}')
+                self.style.ERROR(f'[ERROR] Error creating superuser: {e}')
             )
             import traceback
             self.stdout.write(traceback.format_exc())
