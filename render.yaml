@@ -16,6 +16,12 @@ services:
         fromDatabase:
           name: quizai-db
           property: connectionString
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: admin@quizai.com
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_PASSWORD
+        generateValue: true
 
 databases:
   - name: quizai-db

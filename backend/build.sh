@@ -13,3 +13,8 @@ python manage.py collectstatic --no-input
 
 # Apply database migrations
 python manage.py migrate
+
+# Create default superuser (if it doesn't exist)
+echo "Creating default superuser..."
+python manage.py create_default_superuser
+
