@@ -1,13 +1,32 @@
 # ⚡ START HERE - Automatic Deployment (No Shell Needed!)
 
-## 🎯 Quick Deploy - 3 Steps
+## ⚠️ IMPORTANT: Blueprint Requires Payment Info
 
-### **Step 1: Use Blueprint (Easiest)**
+If you get "requires payment information":
+**👉 Use Manual Setup Instead (Still FREE!)**
+**See:** `FREE_MANUAL_DEPLOYMENT.md` for step-by-step guide
+
+---
+
+## 🎯 Quick Deploy - Choose Method:
+
+### **Method A: Blueprint (Easiest, but requires payment info on file)**
 1. Go to: https://dashboard.render.com/blueprints
 2. Click **"New Blueprint Instance"**
 3. Select repository: `dhanesh-surya/quizai`
 4. Branch: `main`
 5. Click **"Apply"**
+
+**OR**
+
+### **Method B: Manual Setup (100% FREE, no payment info needed) ⭐**
+**👉 See detailed guide:** `FREE_MANUAL_DEPLOYMENT.md`
+
+**Quick Summary:**
+1. Create PostgreSQL database (free)
+2. Create Web Service (free)
+3. Set 8 environment variables
+4. Deploy!
 
 ### **Step 2: Wait (~15 minutes)**
 Render automatically:
