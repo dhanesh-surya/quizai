@@ -83,7 +83,7 @@ Still on the same page, scroll to **"Environment Variables"** section:
 | `DJANGO_SUPERUSER_EMAIL` | `admin@quizai.com` |
 | `DJANGO_SUPERUSER_USERNAME` | `admin` |
 | `DJANGO_SUPERUSER_PASSWORD` | `QuizAI@Admin2026` |
-| `GEMINI_API_KEY` | `AIzaSyBxh0DL5762JnNgb6duv1auLWD153dAnqc` |
+| `GEMINI_API_KEY` |  |
 
 **How to add each one:**
 1. Click "+ Add Environment Variable"
