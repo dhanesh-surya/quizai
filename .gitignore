@@ -6,6 +6,28 @@
 # Credentials (DO NOT COMMIT)
 ADMIN_CREDENTIALS.md
 
+# Old development documentation
+*_COMPLETE.md
+*_FIX*.md
+*_GUIDE.md
+*_ERROR*.md
+*_WORKING*.md
+*_UPDATE*.md
+*_REDESIGN*.md
+THEME_*.md
+COLOR_*.md
+DEBUGGING_*.md
+GLASS_*.md
+NAVBAR_*.md
+PROFILE_*.md
+RESULT_*.md
+MODE_*.md
+HOMEPAGE_*.md
+INTEGRATION_*.md
+USERPROFILE_*.md
+UPDATING_*.md
+TEMPLATES_*.md
+
 # Python
 __pycache__/
 *.py[cod]
