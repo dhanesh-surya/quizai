@@ -3,6 +3,9 @@
 .env.local
 .env.production
 
+# Credentials (DO NOT COMMIT)
+ADMIN_CREDENTIALS.md
+
 # Python
 __pycache__/
 *.py[cod]

@@ -21,7 +21,7 @@ services:
       - key: DJANGO_SUPERUSER_USERNAME
         value: admin
       - key: DJANGO_SUPERUSER_PASSWORD
-        generateValue: true
+        value: QuizAI@Admin2026
 
 databases:
   - name: quizai-db
